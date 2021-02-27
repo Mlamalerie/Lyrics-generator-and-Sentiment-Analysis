@@ -18,9 +18,27 @@ def save_lyrics(songs, artist_name, album_name):
         nomEmplacementSauvegarde += "/" + '_'.join(artist_name.split(' '))
         if not os.path.exists(nomEmplacementSauvegarde):
             os.makedirs(nomEmplacementSauvegarde)
-        with open('songs/{}/{}_{}_{}.txt'.format('_'.join(artist_name.split(' ')), i+1, album_name, '-'.join(''.join(song_title.split('\'')).split(' '))), 'w') as f:
+        with open('lyrics/{}/{}_{}_{}.txt'.format('_'.join(artist_name.split(' ')), i+1, album_name, '-'.join(''.join(song_title.split('\'')).split(' '))), 'w') as f:
             f.writelines(lyrics.split('\\n'))
 
+def retirerDoublons(li,doublonslistesuppr):
+    res = []
+    i = 0
+    
+    while i < len(li):
+        if li[i] in doublonslistesuppr:
+            k = 1
+            res.append(li[i])
+            if i+k < len(li):
+                while li[i+k] in doublonslistesuppr:
+                    k += 1
+                    if i+k >= len(li):
+                        break
+        else:
+            k = 1
+            res.append(li[i])
+        i += k
+    return res
 
 def get_words_from_text(text_chemin):
     with open(text_chemin, 'rb') as file:
@@ -43,21 +61,9 @@ def get_words_from_text(text_chemin):
         text = ' .'.join(text.split('.')) # add ponctuation
         
     words = text.split()
-    return words[:-1]
-        
-"""
-   
-    res = []
-    for i in range(len(words)): #pb de double point
-        if "." == words[i]:
-            if i > 1 and i < len(words):
-                if "." == words[i-1]: 
-                    res.append(words[i])
-        else:
-            res.append(words[i])
-"""   
-    
-  
+    words = retirerDoublons(words,['.'])
+    return words
+
 
 def create_graph(words_list):
     G = Graph()
@@ -96,7 +102,7 @@ def composer(G,words_list,nb_phrases_paragraphes, nbmaxphrases,nbmaxmots=1000):
         
         nbmot += 1
         nouvellephrase_ok = False
-        print(mot_vertex)
+        #print(mot_vertex)
         if mot_vertex.get_id() == '.':
             
             nbphrase += 1
@@ -109,14 +115,78 @@ def composer(G,words_list,nb_phrases_paragraphes, nbmaxphrases,nbmaxmots=1000):
              numparagraphe += 1
              
         
-    print(aventure)       
+    #☺print(aventure)       
     return ' '.join(aventure)
-   
+
+import datetime
+
+def printresultat(resultat,nom):
     
-def main():
+    nomEmplacementSauvegarde = "results"
+    if not os.path.exists(nomEmplacementSauvegarde):
+    	os.makedirs(nomEmplacementSauvegarde)
+    chemin = nomEmplacementSauvegarde
+    
+    dateajd = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+  
+    chemin += "/result_" + nom + "_"
+    chemin += dateajd
+    chemin += ".txt"
+    with open(chemin,"a") as fic: #creer fichier txt
+        print("---")
+        for p in resultat.split('.'):
+
+            fic.write(p + '\n') 
         
-    words_list = get_words_from_text("text.txt")
-    print(words_list)
+    print(" * The generated words are saved :",chemin,"!")
+
+def select_files(orig,i = 0,prof=1,select_dic = {}):
+    espace = "  | "*prof
+    
+    audioext = ['.mp3','.wav','.ogg']
+
+    if os.path.exists(str(orig)):
+        listefichiers = os.listdir(orig)
+        for fil in listefichiers:
+            fil = orig + "\\" + fil
+            if os.path.isdir(fil): #si dossier
+                print(espace,"---",orig.split("\\")[-1], prof)
+                i = select_files(fil,i,prof+1,select_dic)    
+            else: # si fichier
+                
+                
+                bay, ext = os.path.splitext(fil)
+                if ext in audioext: #si fichier audio
+                    print( espace," :",fil.split("\\")[-1])
+                    ecouter(fil)
+                    
+                    
+                   
+                select_dic[i] = fil
+                i+=1
+              
+       
+        return i
+    
+   
+
+
+def main():
+    print("////////////////////////////")
+    print("/////// * LYRIC GENERATOR *")
+    print("//////")
+    choix = {}
+    dossierdata = "lyrics"
+    for i, artistdir in enumerate(os.listdir(dossierdata)):
+        choix[i] = dossierdata + "/" + artistdir
+        print("/"*(len(os.listdir("lyrics"))*2-i) + " {} - {} ".format(i,artistdir))
+        
+    c = int(input(" > "))
+    print(choix)
+    fichier = choix[c]
+    
+    words_list = get_words_from_text(fichier)
+    print(words_list[0:20])
     G = create_graph(words_list)
     #G.affiche() 
     
@@ -126,17 +196,14 @@ def main():
     para = int(input(" * Nb de paragraphes > "))
     """
     
-    resultat = composer(G,words_list,2,6)
+    resultat = composer(G,words_list,4,25)
     
-    print("---")
-    for p in resultat.split('.'):
-        print(p)
+    printresultat(resultat,fichier.split(".")[0])
     """   
     c = int(input("\n (0 : CONTINUE)   (1 : QUIT) > "))
     if c == 0:
         main()
     """
-   
   
 main() 
 """    
