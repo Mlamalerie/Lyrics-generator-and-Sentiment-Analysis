@@ -1,4 +1,4 @@
-# Word inventing machine
+# lyrics-generator
 
 
 
@@ -12,4 +12,4 @@
 
 ---
 ### 👨🏾‍💻👨🏼‍💻 Auteurs
-[Mlamali SAID SALIMO](https://www.linkedin.com/in/mlamalisaidsalimo) <br/> 2012
+[Mlamali SAID SALIMO](https://www.linkedin.com/in/mlamalisaidsalimo) <br/>
