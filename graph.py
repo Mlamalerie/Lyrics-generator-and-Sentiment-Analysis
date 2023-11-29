@@ -11,7 +11,12 @@ class Vertex:
         self.voisins_poids = [] # list int
     
     def __str__(self):
-        return self.id + " •~> : "+ ', '.join([ str(p)+ "#"+sommetsadj.id for sommetsadj,p in self.adjacent.items()])
+        return f"{self.id} •~> : " + ', '.join(
+            [
+                f"{str(p)}#{sommetsadj.id}"
+                for sommetsadj, p in self.adjacent.items()
+            ]
+        )
     
     def add_edge_to(self,vertex, poids=0):
         self.adjacent[vertex] = poids # ex : je •~> : 4#suis
